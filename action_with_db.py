@@ -1,20 +1,28 @@
 """Файл для работы с БД"""
 import psycopg2
 
-con = psycopg2.connect(
-    database="postgres",
-    user="postgres",
-    password="221052",
-    host="127.0.0.1",
-    port="5432"
-)
 
 
-def data_base_creating() -> None:
-    """Функция создает таблицы GOODS и SHOPS_GOOD,если они не созданы."""
-    cur = con.cursor()
+def db_connector(function):
+    connection = psycopg2.connect(
+        database="postgres",
+        user="postgres",
+        password="221052",
+        host="127.0.0.1",
+        port="5432"
+    )
+    cursor = connection.cursor()
+    def wrapper():
+        print('Создаем подключение к БД')
+        function(connection, cursor)
+        print('Закрываем соединение')
+    return wrapper
 
-    cur.execute('''CREATE TABLE IF NOT EXISTS ROBENS
+
+@db_connector
+def data_base_creating(connection, cursor) -> None:
+    """Функция создает таблицу ROBENS."""
+    cursor.execute('''CREATE TABLE IF NOT EXISTS ROBENS2
          (ID SERIAL  PRIMARY KEY NOT NULL ,
          SENDER VARCHAR NOT NULL,
          RECIPIENT VARCHAR NOT NULL,
@@ -23,29 +31,30 @@ def data_base_creating() -> None:
          CREATION_TIME VARCHAR NOT NULL,
          APPROVE_CODE VARCHAR NOT NULL);''')
 
-    con.commit()
+    connection.commit()
 
-#
-# def insert_goods(a: dict) -> None:
-#     """Функция вставляет значения в таблицу GOODS или обновляет их, если они уже вставлены."""
-#     a = a
-#     cur = con.cursor()
-#     try:
-#         cur.execute(
-#             "INSERT INTO GOODS (ID,NAME,PACKAGE_HEIGHT,PACKAGE_WIDTH) VALUES (%s, %s, %s, %s);",
-#             (a['id'], a['name'], a['height'], a['width'])
-#         )
-#
-#         con.commit()
-#     except psycopg2.errors.UniqueViolation:
-#         cur.execute("ROLLBACK")
-#         con.commit()
-#         cur.execute(
-#             "UPDATE GOODS SET NAME = %s ,PACKAGE_HEIGHT = %s, PACKAGE_WIDTH = %s WHERE ID = %s",
-#             (a['name'], a['height'], a['width'], a['id'])
-#         )
-#         con.commit()
-#
+data_base_creating()
+
+def insert_goods(a: dict) -> None:
+    """Функция вставляет значения в таблицу GOODS или обновляет их, если они уже вставлены."""
+    a = a
+    cur = con.cursor()
+    try:
+        cur.execute(
+            "INSERT INTO GOODS (ID,NAME,PACKAGE_HEIGHT,PACKAGE_WIDTH) VALUES (%s, %s, %s, %s);",
+            (a['id'], a['name'], a['height'], a['width'])
+        )
+
+        con.commit()
+    except psycopg2.errors.UniqueViolation:
+        cur.execute("ROLLBACK")
+        con.commit()
+        cur.execute(
+            "UPDATE GOODS SET NAME = %s ,PACKAGE_HEIGHT = %s, PACKAGE_WIDTH = %s WHERE ID = %s",
+            (a['name'], a['height'], a['width'], a['id'])
+        )
+        con.commit()
+
 #
 # def insert_shops_goods(a: dict) -> None:
 #     """Функция вставляет значения в таблицу SHOPS_GOODS, или обновляет их."""
