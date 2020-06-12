@@ -2,6 +2,7 @@
 import random
 import string
 
+
 def status_randomizer() -> str:
     """Генерация случайного статуса посылки."""
     list_of_statuses = ['Обрабатывается', 'Выполняется ', 'Доставлено']
@@ -18,7 +19,7 @@ def id_randomizer() -> str:
             id += random.choice(string.ascii_lowercase)
             id += str(random.choice(string.digits))
             for i in range(random.randint(0, 3)):
-                id +=random.choice(string.ascii_lowercase) or str(random.choice(string.digits))
+                id += random.choice(string.ascii_lowercase) or str(random.choice(string.digits))
             count += 1
             yield id
 
