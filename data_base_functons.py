@@ -18,7 +18,7 @@ async def try_make_db():
 async def insert_values(id, status):
     async with aiosqlite.connect('sqlite_db_deliviery') as db:
         try:
-            await db.execute("""INSERT INTO delivieries (id , status) VALUES 
+            await db.execute("""INSERT OR REPLACE INTO delivieries (id , status) VALUES 
                        ('{0}', '{1}')
                    """.format(id, status))
             print('Запись добавлена в БД')
