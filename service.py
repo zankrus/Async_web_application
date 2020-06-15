@@ -1,6 +1,12 @@
 """Файл для хранения вспомогательных функций."""
 import random
 import string
+from typing import Any
+
+import jsonschema
+from jsonschema import validate
+
+from schema import SCHEMA
 
 
 def status_randomizer() -> str:
@@ -25,4 +31,15 @@ def id_randomizer() -> str:
 
     list_of_id = [x for x in id_generator()]
     return random.choice(list_of_id)
+
+
+def input_validation(input_json: dict, schema: dict = SCHEMA) -> Any:
+    """Валидатор входящего JSON."""
+    print('Входящий JSON : ' + str(input_json))
+    try:
+        validate(input_json, schema)
+        return input_json
+    except jsonschema.exceptions.ValidationError:
+        print('Json  провалил проверку валидации схемы')
+
 
