@@ -1,20 +1,7 @@
 import asyncio
 import sqlite3
-
 import aiosqlite
-
-#
-# def try_make_db() -> None:
-#     with sqlite3.connect('sqlite_db') as conn:
-#         cur = conn.cursor()
-#         cur.execute(
-#             """CREATE TABLE IF NOT EXISTS  delivieries  (
-#             id TEXT PRIMARY KEY,
-#             status TEXT)
-#         """
-#         )
-#         conn.commit()
-#
+import requests
 
 
 async def try_make_db():
@@ -26,16 +13,30 @@ async def try_make_db():
         await db.commit()
 
 
-async def insert_values(id,status):
+async def insert_values(id, status):
     async with aiosqlite.connect('sqlite_db_deliviery') as db:
         try:
-            await db.execute("""INSERT INTO delivieries VALUES 
+            await db.execute("""INSERT INTO delivieries (id , status) VALUES 
                        ('{0}', '{1}')
-                   """.format(id,status))
-
+                   """.format(id, status))
             await db.commit()
-        except sqlite3.IntegrityError:
+        except Exception:
             await db.execute("""UPDATE delivieries SET status ='{1}' WHERE ID = '{0}'
                                """.format(id, status))
 
             await db.commit()
+
+
+async def select_db():
+    async with aiosqlite.connect('sqlite_db_deliviery') as db:
+        summary = []
+        cursor = await db.execute('SELECT * FROM delivieries')
+        rows = await cursor.fetchall()
+        for row in rows:
+            ident = {'id': row[0]}
+            status = {'status': row[1]}
+            summary.append((ident, status))
+        return summary
+
+
+
