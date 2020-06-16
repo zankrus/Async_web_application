@@ -1,12 +1,12 @@
-import asyncio
+"""File with DB functions."""
 import sqlite3
+from typing import Any
+
 import aiosqlite
-import requests
-
-from service import id_randomizer
 
 
-async def try_make_db():
+async def try_make_db() -> None:
+    """Async creating of DB."""
     async with aiosqlite.connect('sqlite_db_deliviery') as db:
         await db.execute("""CREATE TABLE IF NOT EXISTS  delivieries  (
                 id TEXT PRIMARY KEY,
@@ -15,22 +15,21 @@ async def try_make_db():
         await db.commit()
 
 
-async def insert_values(id, status):
+async def insert_values(id: str, status: str) -> Any:
+    """ASYNC inserting or updating DB."""
     async with aiosqlite.connect('sqlite_db_deliviery') as db:
         try:
-            await db.execute("""INSERT OR REPLACE INTO delivieries (id , status) VALUES 
-                       ('{0}', '{1}')
+            await db.execute("""INSERT OR REPLACE INTO
+            delivieries (id , status) VALUES ('{0}', '{1}')
                    """.format(id, status))
             print('Запись добавлена в БД')
             await db.commit()
         except sqlite3.IntegrityError:
-            await db.execute("""UPDATE delivieries SET status ='{1}' WHERE ID = '{0}'
-                               """.format(id, status))
-            print('Запись обновлена в БД')
-            await db.commit()
+            return False
 
 
-async def select_db():
+async def select_db() -> list:
+    """Selecting from DB."""
     async with aiosqlite.connect('sqlite_db_deliviery') as db:
         summary = []
         cursor = await db.execute('SELECT * FROM delivieries')
@@ -40,5 +39,3 @@ async def select_db():
             status = {'status': row[1]}
             summary.append((ident, status))
         return summary
-
-
